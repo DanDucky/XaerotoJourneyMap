@@ -33,7 +33,10 @@ void Converter::runConversion() {
     }
 
     cout << "converting overworld" << endl;
+    auto startTime = chrono::high_resolution_clock::now();
     convertDimension(0);
+    cout << "finished in: " << chrono::duration<float, chrono::milliseconds::period>(chrono::high_resolution_clock::now() - startTime) << endl;
+
 //    convertDimension(1);
 //    convertDimension(-1);
 }
@@ -60,19 +63,14 @@ void Converter::convertDimension(int dimension) {
     }
     dimensionFolder /= "mw$default";
 
-    queue<path> xaeroFiles;
+    deque<path> xaeroFiles;
     for (const auto& file : directory_iterator(dimensionFolder)) {
-        xaeroFiles.push(file.path());
+        xaeroFiles.push_back(file.path());
+        cout << file.path().string() << "\n";
+        RegionConverter test{};
+        test.loadRegion(file.path());
+        test.convert();
     }
-
-    for (int i = 0; i < 10; i++) {
-        xaeroFiles.pop();
-    }
-    cout << xaeroFiles.front().string() << endl;
-    RegionConverter test{};
-    test.loadRegion(xaeroFiles.front());
-    test.convert();
-    cout << xaeroFiles.front().string() << endl;
 }
 
 void Converter::RegionConverter::loadRegion(std::filesystem::path region) {
@@ -176,7 +174,7 @@ void Converter::RegionConverter::RegionParser::getNextBlockParameters(
             workingOverlay->legacyHasOpacity = bitParser.getNextBool(true);
             const bool shouldRunCustomColor = bitParser.getNextBool(true);
             workingOverlay->hasOpacity = bitParser.getNextBool(true);
-            workingOverlay->light = bitParser.getNextBits(4);
+            workingOverlay->light = bitParser.getNextBits(4, true);
             workingOverlay->savedColorType = bitParser.getNextBits(2, true);
 
             if (!workingOverlay->isWater) {
@@ -245,16 +243,14 @@ Converter::RegionConverter::RegionParser::getRegion(Converter::RegionConverter::
             eof = true;
             continue;
         }
-        cout << "checking chunk at\n" << currentTile.x << "\n" <<currentTile.z << endl;
         for (int chunkX = 0; chunkX < 4; chunkX++) {
             for (int chunkZ = 0; chunkZ < 4; chunkZ++) {
-                bitParser.loadInt();
-                if (bitParser.getValue() == -1) { // this means ChunkParameters is void
-                    cout << "found void chunk" << endl;
+                if (bitParser.peekNextInt() == -1) { // this means ChunkParameters is void
+                    // VOID CHUNK
+                    bitParser.incrementPosition(4); // skip over void chunk
                     region[currentTile.x][currentTile.z].chunks[chunkX][chunkZ].isVoid = true;
                 } else { // actual ChunkParameters :o
-                    bitParser.incrementPosition(-4); // step back from previous int check
-                    cout << "found actual chunk" << endl;
+                    // LOADED CHUNK
                     ChunkParameters *workingChunk = &region[currentTile.x][currentTile.z].chunks[chunkX][chunkZ];
                     workingChunk->isVoid = false;
                     workingChunk->chunk = new Chunk{};

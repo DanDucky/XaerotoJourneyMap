@@ -102,6 +102,8 @@ private:
                 void loadByte();
                 void loadSize(int bytes);
 
+                int peekNextInt();
+
                 int getValue() const;
                 void incrementPosition(int bytes);
                 void skipBits(int bits);

@@ -81,3 +81,12 @@ void Converter::RegionConverter::RegionParser::ByteParser::skipBits(int bits) {
 int Converter::RegionConverter::RegionParser::ByteParser::getFilePosition() const {
     return filePosition;
 }
+
+int Converter::RegionConverter::RegionParser::ByteParser::peekNextInt() {
+    const string substring = file->substr(filePosition, 4);
+    int constructedInt = 0;
+    for (int i = 0; i < 4; i++) {
+        constructedInt = constructedInt << 8 | static_cast<unsigned char>(substring[i]);
+    }
+    return constructedInt;
+}
