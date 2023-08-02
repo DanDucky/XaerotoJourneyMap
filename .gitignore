@@ -1,0 +1,6 @@
+/Input
+/resources
+/cmake-build-*
+/Test
+CMakeCache.txt
+/.idea
