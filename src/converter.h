@@ -36,9 +36,10 @@ private:
         class RegionParser {
         public:
             struct OverlayParameters {
-                bool isWater;
+                bool isNotWater;
                 bool hasOpacity;
                 bool legacyHasOpacity;
+                bool hasCustomColor;
                 int light;
                 int savedColorType;
 

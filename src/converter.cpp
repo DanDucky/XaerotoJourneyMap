@@ -170,24 +170,25 @@ void Converter::RegionConverter::RegionParser::getNextBlockParameters(
         for (int i = 0; i < parameters.numberOfOverlays; i++) {
             bitParser.loadInt();
             OverlayParameters* workingOverlay = &parameters.overlays[i];
-            workingOverlay->isWater = !bitParser.getNextBool(true);
+            workingOverlay->isNotWater = bitParser.getNextBool(true);
             workingOverlay->legacyHasOpacity = bitParser.getNextBool(true);
-            const bool shouldRunCustomColor = bitParser.getNextBool(true);
+            workingOverlay->hasCustomColor = bitParser.getNextBool(true);
             workingOverlay->hasOpacity = bitParser.getNextBool(true);
             workingOverlay->light = bitParser.getNextBits(4, true);
             workingOverlay->savedColorType = bitParser.getNextBits(2, true);
 
-            if (!workingOverlay->isWater) {
+            if (workingOverlay->isNotWater) {
                 bitParser.loadInt();
                 workingOverlay->state = bitParser.getValue();
             } // else state = water
 
             // old opacity check [SKIP]
             if (saveVersion < 1 && workingOverlay->legacyHasOpacity) {
-                bitParser.incrementPosition(4);
+                bitParser.loadInt();
+                workingOverlay->opacity = bitParser.getValue();
             }
 
-            if (workingOverlay->savedColorType == 2 || shouldRunCustomColor) {
+            if (workingOverlay->savedColorType == 2 || workingOverlay->hasCustomColor) {
                 bitParser.loadInt();
                 if (bitParser.getValue() == -1) {
                     workingOverlay->savedColorType = 0;
@@ -243,7 +244,7 @@ Converter::RegionConverter::RegionParser::getRegion(Converter::RegionConverter::
             eof = true;
             continue;
         }
-        for (int chunkX = 0; chunkX < 4; chunkX++) {
+        for (int chunkX = 0; chunkX < 4; chunkX++) { // todo: replace with range based loops :3
             for (int chunkZ = 0; chunkZ < 4; chunkZ++) {
                 if (bitParser.peekNextInt() == -1) { // this means ChunkParameters is void
                     // VOID CHUNK
@@ -260,7 +261,7 @@ Converter::RegionConverter::RegionParser::getRegion(Converter::RegionConverter::
                         }
                     }
                     bitParser.incrementPosition(1); // this skips chunk version byte
-                    if (saveVersion != 4) {
+                    if (saveVersion > 4) {
                         bitParser.incrementPosition(5); // skip past weird cave info
                     }
                 }
