@@ -1,6 +1,13 @@
 #ifndef XAEROTOJOURNEYMAP_CONVERTER_H
 #define XAEROTOJOURNEYMAP_CONVERTER_H
 
+#define REGION_SIZE 512
+
+#define RED 0
+#define GREEN 1
+#define BLUE 2
+#define ALPHA 3
+
 #include <string>
 #include <filesystem>
 #include <utility>
@@ -9,6 +16,7 @@
 #include <utility>
 #include <thread>
 #include <iostream>
+#include <array>
 
 class Converter {
 public:
@@ -25,14 +33,31 @@ private:
     std::filesystem::path inputFolder;
     std::filesystem::path outputFolder;
 
-    class RegionConverter;
+    struct Image {
+        unsigned char image[REGION_SIZE * REGION_SIZE * 4];
+
+        std::array<unsigned char*, 4> operator[] (int x, int z) { // returns array of size 4 representing 1 pixel in the final image
+            std::array<unsigned char*, 4> pixel{};
+            for (int i = 0; i < 4; i++) {
+                pixel[i] = &(image[(x + z * REGION_SIZE) * 4 + i]);
+            }
+            return pixel;
+        }
+    };
 
     class RegionConverter {
     public:
-        void loadRegion(std::filesystem::path region);
-        void convert();
+        struct Region;
+
     private:
-        std::filesystem::path regionFile;
+
+        void writeImage();
+
+        std::string regionFile;
+
+        class ColorConverter {
+
+        };
         class RegionParser {
         public:
             struct OverlayParameters {
@@ -90,13 +115,13 @@ private:
                 int z;
             };
 
-            RegionParser(std::string file);
-            void getRegion(TileChunk (&region)[][8]);
+            RegionParser(std::string * file);
+            void getRegion(Region & region);
         private:
             class ByteParser {
             public:
-                ByteParser(std::string& file) {
-                    this->file = &file;
+                ByteParser(std::string * file) {
+                    this->file = file;
                 }
 
                 void loadInt();
@@ -129,7 +154,7 @@ private:
                 void loadNextOfSize(int size);
             };
 
-            std::string file;
+            std::string * file;
 
             int saveVersion = 0;
 
@@ -139,7 +164,18 @@ private:
 
             Coordinate getNextTileCoordinate();
         };
-        static void freePixelData(RegionParser::TileChunk (&region)[][8]);
+        static void freePixelData(Region & region);
+    public:
+        struct Region {
+            RegionParser::TileChunk region[8][8];
+
+            RegionParser::TileChunk* operator[] (int xIndex) {
+                return region[xIndex];
+            }
+        };
+
+        void loadRegion(std::filesystem::path region);
+        void convert(Region & region);
     };
 };
 

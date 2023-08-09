@@ -11,7 +11,7 @@
 * I don't entirely know why some parts of the format exist, I'm just telling you how they're partitioned
 * the xaero format DOES change between versions
   * THIS MEANS THAT THIS COULD BECOME OUTDATED!!! this was written as of **version 7** of the xaero region save format
-* each section will havc a title then a small graphic explaining it, followed by a text explanation of the logic.
+* each section will have a title then a small graphic explaining it, followed by a text explanation of the logic.
 
 ## Versioning [5 Bytes]
 
@@ -123,10 +123,10 @@ for (int xChunk = 0; xChunk < 4; xChunk++) {
 > Otherwise this byte is your biome id and you **don't** need to continue to the next if statement below.
 
 ## `IF` Biome flag is 255 `AND` region save version is `GREATER THAN OR EQUAL TO` 3
-| █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` |
-|---------------------------------------------------------------------------------|
-| biome id<br/>`unsigned int`                                                     |
-| unsigned int is the full biome id if it is greater than or equal to 255         |
+| █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █    |
+|--------------------------------------------------------------------------------|
+| biome id<br/>`unsigned int`                                                    |
+| unsigned int is the full biome id if it is greater than or equal to 255        |
 
 > If the biome flag we just read is 255 AND the region save version is greater than or equal to 3 then we read this next int and interpret it as the biome id.
 > Ignore whatever number you just got from the previous byte!
@@ -161,7 +161,7 @@ for (int xChunk = 0; xChunk < 4; xChunk++) {
 
 ### `IF` Overlay is not water (water flag)
 
-| █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` `          |
+| █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █              |
 |------------------------------------------------------------------------------------------|
 | overlay block id<br/>`signed int`                                                        |
 | signed int is full block id of the overlay, the color of this can be grabbed from a list |
@@ -172,10 +172,10 @@ for (int xChunk = 0; xChunk < 4; xChunk++) {
 
 ### `IF` Overlay has a legacy opacity `AND` save version is `LESS THAN` 1
 
-| █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` |
-|---------------------------------------------------------------------------------|
-| overlay opacity<br/>`unsigned int`                                              |
-| unsigned int is the opacity of the overlay pixel if it is using legacy opacity  |
+| █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █    |
+|--------------------------------------------------------------------------------|
+| overlay opacity<br/>`unsigned int`                                             |
+| unsigned int is the opacity of the overlay pixel if it is using legacy opacity |
 
 > Read this unsigned int as the opacity ONLY if the version is LESS THAN 1 AND the legacy opacity flag is true
 > 
@@ -183,7 +183,7 @@ for (int xChunk = 0; xChunk < 4; xChunk++) {
 
 ### `IF` overlay color type is 2 `OR` overlay has custom color
 
-| █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` `                                                                           |
+| █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █                                                                               |
 |-----------------------------------------------------------------------------------------------------------------------------------------------------------|
 | custom color and overlay color type flag int<br/>`signed int`                                                                                             |
 | -1 → color type can now be set to 0<br/>!-1 → color type can be set to 3<br/>regardless of the above conditional, this signed int is now the custom color |
@@ -196,10 +196,10 @@ for (int xChunk = 0; xChunk < 4; xChunk++) {
 
 ### `IF` overlay has opacity
 
-| █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` |
-|---------------------------------------------------------------------------------|
-| overlay opacity<br/>`unsigned int`                                              |
-| unsigned int is the opacity of the overlay pixel                                |
+| █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █ ` ` █ █ █ █ █ █ █ █   |
+|-------------------------------------------------------------------------------|
+| overlay opacity<br/>`unsigned int`                                            |
+| unsigned int is the opacity of the overlay pixel                              |
 
 > Read this as an unsigned int if the opacity flag is true. This value is now the opacity of the overlay pixel. If this bit was not set then the opacity is 1.
 

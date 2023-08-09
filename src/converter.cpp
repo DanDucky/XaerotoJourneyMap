@@ -3,6 +3,8 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
+#define REGION_SIZE 512
+
 //#include <ctpl_stl.h> // for future thread stuff
 
 #include <Zip/ZipStream.h>
@@ -10,12 +12,10 @@
 #include <StreamCopier.h>
 
 #include <filesystem>
-#include <utility>
-#include <vector>
 #include <iostream>
-#include <queue>
 #include <fstream>
 #include <bitset>
+#include <stack>
 
 using namespace std;
 using namespace Poco::Zip;
@@ -63,22 +63,20 @@ void Converter::convertDimension(int dimension) {
     }
     dimensionFolder /= "mw$default";
 
-    deque<path> xaeroFiles;
+    stack<path> xaeroFiles;
     for (const auto& file : directory_iterator(dimensionFolder)) {
-        xaeroFiles.push_back(file.path());
+        xaeroFiles.push(file.path());
         cout << file.path().string() << "\n";
         RegionConverter test{};
+        RegionConverter::Region region;
         test.loadRegion(file.path());
-        test.convert();
+        test.convert(region);
+
     }
 }
 
-void Converter::RegionConverter::loadRegion(std::filesystem::path region) {
-    this->regionFile = std::move(region);
-}
-
-void Converter::RegionConverter::convert() {
-    ifstream zipFile(regionFile, ios::binary);
+void Converter::RegionConverter::loadRegion(std::filesystem::path region) { // read from zippington
+    ifstream zipFile(region, ios::binary);
     poco_assert(zipFile);
     ZipArchive archive(zipFile);
     ZipArchive::FileHeaders::const_iterator iterator = archive.findHeader("region.xaero");
@@ -87,17 +85,21 @@ void Converter::RegionConverter::convert() {
     ZipInputStream zipIn(zipFile, iterator->second);
     ostringstream out(ios::binary);
     Poco::StreamCopier::copyStream(zipIn, out);
-    string regionFile = out.str();
+    regionFile = out.str();
+}
 
-    RegionParser parser(regionFile);
+void Converter::RegionConverter::convert(Region& region) {
+    RegionParser parser(&regionFile);
 
-    RegionParser::TileChunk region[8][8];
     parser.getRegion(region);
 
     freePixelData(region);
+
+    Image image{};
+    *image[16,16][RED] = (unsigned char) 255;
 }
 
-void Converter::RegionConverter::freePixelData(Converter::RegionConverter::RegionParser::TileChunk (&region)[][8]) {
+void Converter::RegionConverter::freePixelData(Region & region) {
     /*
      * frees all of the optionally allocated heap memory from the in-memory region
      * this is optionally allocated as some chunks are void, which means that they don't need any of the data from Parameters{}
@@ -123,9 +125,9 @@ void Converter::RegionConverter::freePixelData(Converter::RegionConverter::Regio
 
 }
 
-Converter::RegionConverter::RegionParser::RegionParser(std::string file)
+Converter::RegionConverter::RegionParser::RegionParser(std::string * file)
         : bitParser(bitParser) {
-    this->file = std::move(file);
+    this->file = file;
 
     bitParser = ByteParser(this->file);
 
@@ -223,7 +225,7 @@ void Converter::RegionConverter::RegionParser::getNextBlockParameters(
 
 Converter::RegionConverter::RegionParser::Coordinate Converter::RegionConverter::RegionParser::getNextTileCoordinate() {
     Coordinate tileCoordinates {};
-    if (bitParser.getFilePosition() == file.size()) { // file over YAYYYYY
+    if (bitParser.getFilePosition() == file->size()) { // file over YAYYYYY
         tileCoordinates.x = -1;
         tileCoordinates.z = -1;
         return tileCoordinates;
@@ -235,7 +237,7 @@ Converter::RegionConverter::RegionParser::Coordinate Converter::RegionConverter:
 }
 
 void
-Converter::RegionConverter::RegionParser::getRegion(Converter::RegionConverter::RegionParser::TileChunk (&region)[][8]) {
+Converter::RegionConverter::RegionParser::getRegion(Region & region) {
     bool eof = false;
     Coordinate currentTile;
     for (int iterations = 0; iterations < (8*8) && !eof; iterations++) {
