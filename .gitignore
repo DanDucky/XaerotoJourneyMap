@@ -1,5 +1,8 @@
 /Input
-/resources
+/resources/convert.out
+/resources/stateToColor.h
+/resources/blockstateidtoname.txt
+/resources/blocknametocolor.txt
 /cmake-build-*
 /Test
 CMakeCache.txt
