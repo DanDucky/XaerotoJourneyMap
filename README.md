@@ -80,7 +80,7 @@ for (int xChunk = 0; xChunk < 4; xChunk++) {
 | █ █ █ █ █ █ █ █` `█ █ █ █ █ █ █ █` `█ █ █ █ █ █ █ █` `█ █ █ █ █ █ █ █                                                                            |
 |--------------------------------------------------------------------------------------------------------------------------------------------------|
 | read as signed int <br/>`signed int`                                                                                                             |
-| signed int is the "block state" of the pixel<br/>there's a list of all of the block state numbers and their translation to color in the codebase |
+| signed int is the "block stateId" of the pixel<br/>there's a list of all of the block stateId numbers and their translation to color in the codebase |
 
 > If the parameters told us that the pixel is not grass, meaning it has a special color and block id, then we need to read this int. This int will tell us what block it is so that we can later decode its color.
 

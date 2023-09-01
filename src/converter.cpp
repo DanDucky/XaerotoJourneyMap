@@ -3,8 +3,6 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
-#define REGION_SIZE 512
-
 //#include <ctpl_stl.h> // for future thread stuff
 
 #include <Zip/ZipStream.h>
@@ -63,23 +61,34 @@ void Converter::convertDimension(int dimension) {
     }
     dimensionFolder /= "mw$default";
 
-    stack<path> xaeroFiles;
+//    Image image{};
+//    for (int x = 0; x < 512; x++) {
+//        for (int z = 0; z < 512; z++) {
+//            *image[x,z][RED] = (unsigned char) 255;
+//            *image[x,z][ALPHA] = (x % 2 == 0) && (z % 2 == 0) ? (unsigned char) 255 : (unsigned char) 0;
+//        }
+//    }
+//    stbi_write_png("/home/danducky/Programming/C++/XaerotoJourneyMap/Test/keb.png", REGION_SIZE, REGION_SIZE, 4, &image, REGION_SIZE*4);
+
+    vector<path> xaeroFiles;
     for (const auto& file : directory_iterator(dimensionFolder)) {
-        xaeroFiles.push(file.path());
+        xaeroFiles.push_back(file.path());
         cout << file.path().string() << "\n";
         RegionConverter test{};
         RegionConverter::Region region;
         test.loadRegion(file.path());
         test.convert(region);
-
     }
 }
+
+//constexpr std::map<int, int> Converter::getMap(std::filesystem::path pathToData) {
+//}
 
 void Converter::RegionConverter::loadRegion(std::filesystem::path region) { // read from zippington
     ifstream zipFile(region, ios::binary);
     poco_assert(zipFile);
     ZipArchive archive(zipFile);
-    ZipArchive::FileHeaders::const_iterator iterator = archive.findHeader("region.xaero");
+    auto iterator = archive.findHeader("region.xaero");
     poco_assert(iterator != archive.headerEnd());
     zipFile.clear();
     ZipInputStream zipIn(zipFile, iterator->second);
@@ -95,8 +104,6 @@ void Converter::RegionConverter::convert(Region& region) {
 
     freePixelData(region);
 
-    Image image{};
-    *image[16,16][RED] = (unsigned char) 255;
 }
 
 void Converter::RegionConverter::freePixelData(Region & region) {
@@ -157,7 +164,7 @@ void Converter::RegionConverter::RegionParser::getNextBlockParameters(
 
     if (parameters.isNotGrass) {
         bitParser.loadInt();
-        parameters.state = bitParser.getValue();
+        parameters.stateId = bitParser.getValue();
     }
 
     if (parameters.topHeightAndHeightDontMatch && saveVersion >= 4) {
@@ -182,7 +189,7 @@ void Converter::RegionConverter::RegionParser::getNextBlockParameters(
             if (workingOverlay->isNotWater) {
                 bitParser.loadInt();
                 workingOverlay->state = bitParser.getValue();
-            } // else state = water
+            } // else stateId = water
 
             // old opacity check [SKIP]
             if (saveVersion < 1 && workingOverlay->legacyHasOpacity) {
@@ -239,9 +246,8 @@ Converter::RegionConverter::RegionParser::Coordinate Converter::RegionConverter:
 void
 Converter::RegionConverter::RegionParser::getRegion(Region & region) {
     bool eof = false;
-    Coordinate currentTile;
     for (int iterations = 0; iterations < (8*8) && !eof; iterations++) {
-        currentTile = getNextTileCoordinate();
+        Coordinate currentTile = getNextTileCoordinate();
         if (currentTile.x == -1 || currentTile.z == -1) {
             eof = true;
             continue;

@@ -1,6 +1,8 @@
 #ifndef XAEROTOJOURNEYMAP_CONVERTER_H
 #define XAEROTOJOURNEYMAP_CONVERTER_H
 
+#define AIR_ID -16777216
+
 #define REGION_SIZE 512
 
 #define RED 0
@@ -17,6 +19,7 @@
 #include <thread>
 #include <iostream>
 #include <array>
+#include <map>
 
 class Converter {
 public:
@@ -30,20 +33,12 @@ private:
     void createSubfolders();
     void convertDimension(int dimension);
 
+//    constexpr std::map<int, int> getMap(std::filesystem::path pathToData);
+
+    const std::map<int, int> stateIdToColor = {{1, 1}};
+
     std::filesystem::path inputFolder;
     std::filesystem::path outputFolder;
-
-    struct Image {
-        unsigned char image[REGION_SIZE * REGION_SIZE * 4];
-
-        std::array<unsigned char*, 4> operator[] (int x, int z) { // returns array of size 4 representing 1 pixel in the final image
-            std::array<unsigned char*, 4> pixel{};
-            for (int i = 0; i < 4; i++) {
-                pixel[i] = &(image[(x + z * REGION_SIZE) * 4 + i]);
-            }
-            return pixel;
-        }
-    };
 
     class RegionConverter {
     public:
@@ -55,9 +50,6 @@ private:
 
         std::string regionFile;
 
-        class ColorConverter {
-
-        };
         class RegionParser {
         public:
             struct OverlayParameters {
@@ -87,7 +79,7 @@ private:
                 int customColor;
                 int topHeight;
                 int biome;
-                int state;
+                int stateId;
                 int numberOfOverlays;
 
                 OverlayParameters* overlays;
@@ -165,6 +157,31 @@ private:
             Coordinate getNextTileCoordinate();
         };
         static void freePixelData(Region & region);
+
+        class ColorConverter {
+        public:
+            struct Image {
+                unsigned char image[REGION_SIZE * REGION_SIZE * 4];
+
+                std::array<unsigned char*, 4> operator[] (int x, int z) { // returns array of size 4 representing 1 pixel in the final image
+                    std::array<unsigned char*, 4> pixel{};
+                    for (int i = 0; i < 4; i++) {
+                        pixel[i] = &(image[(x + z * REGION_SIZE) * 4 + i]);
+                    }
+                    return pixel;
+                }
+            };
+
+            ColorConverter(Region & region);
+            void getImage(Image & image);
+        private:
+            Region * region;
+
+            RegionParser::Parameters & parametersFromPixel(int x, int z);
+            void setChunkVoid(Image & image, int chunkX, int chunkZ);
+            void getPixelColor(const std::array<unsigned char*, 4> & pixel, int x, int z);
+        };
+
     public:
         struct Region {
             RegionParser::TileChunk region[8][8];
