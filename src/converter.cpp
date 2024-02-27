@@ -5,18 +5,23 @@
 
 //#include <ctpl_stl.h> // for future thread stuff
 
-#include <Zip/ZipStream.h>
-#include <Zip/ZipArchive.h>
-#include <StreamCopier.h>
+//#include <Zip/ZipStream.h>
+//#include <Zip/ZipArchive.h>
+//#include <StreamCopier.h>
+
+//#include <unzip.h>
+
+#include <libzippp.h>
 
 #include <filesystem>
+#include <chrono>
 #include <iostream>
 #include <fstream>
 #include <bitset>
 #include <stack>
 
 using namespace std;
-using namespace Poco::Zip;
+//using namespace Poco::Zip;
 using namespace filesystem;
 
 Converter::Converter(string inputFolder, string outputFolder) {
@@ -85,22 +90,36 @@ void Converter::convertDimension(int dimension) {
 //}
 
 void Converter::RegionConverter::loadRegion(std::filesystem::path region) { // read from zippington
-    ifstream zipFile(region, ios::binary);
-    poco_assert(zipFile);
-    ZipArchive archive(zipFile);
-    auto iterator = archive.findHeader("region.xaero");
-    poco_assert(iterator != archive.headerEnd());
-    zipFile.clear();
-    ZipInputStream zipIn(zipFile, iterator->second);
-    ostringstream out(ios::binary);
-    Poco::StreamCopier::copyStream(zipIn, out);
-    regionFile = out.str();
+    using namespace libzippp;
+    ZipArchive zip(region);
+    zip.open(ZipArchive::ReadOnly);
+
+    ZipEntry entry = zip.getEntry("region.xaero");
+    if (entry.isNull()) return; //bad file!!!!!
+    regionFile = entry.readAsText();
+    zip.close();
+
+
+//    ifstream zipFile(region, ios::binary);
+//    poco_assert(zipFile);
+//    ZipArchive archive(zipFile);
+//    auto iterator = archive.findHeader("region.xaero");
+//    poco_assert(iterator != archive.headerEnd());
+//    zipFile.clear();
+//    ZipInputStream zipIn(zipFile, iterator->second);
+//    ostringstream out(ios::binary);
+//    Poco::StreamCopier::copyStream(zipIn, out);
+//    regionFile = out.str();
 }
 
 void Converter::RegionConverter::convert(Region& region) {
     RegionParser parser(&regionFile);
 
     parser.getRegion(region);
+
+//    ColorConverter colorConverter(region);
+    ColorConverter::Image image {};
+//    colorConverter.getImage(image);
 
     freePixelData(region);
 

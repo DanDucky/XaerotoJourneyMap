@@ -7,3 +7,13 @@
 /Test
 CMakeCache.txt
 /.idea
+include
+/src/lookup/stateToColor.h
+include/stb_image_write.h
+include/libzippp.h
+include/cmake/get_cpm.cmake
+include/CLIParser.hpp
+/resources/CMakeFiles/
+/resources/Bundler
+/resources/cmake_install.cmake
+/resources/Makefile

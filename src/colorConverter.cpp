@@ -19,7 +19,7 @@ void Converter::RegionConverter::ColorConverter::getImage(Converter::RegionConve
                     for (int x = 0; x < 16; x++) {
                         for (int z = 0; z < 16; z++) {
                             const array<unsigned char*, 4> pixel = image[(tileX * 64) + (chunkX * 16) + x, (tileZ * 64) + (chunkZ * 16) + z];
-                            getPixelColor(pixel, (tileX * 64) + (chunkX + 16) + x, (tileZ * 64) + (chunkZ * 16) + z);
+                            setPixelColor(pixel, (tileX * 64) + (chunkX + 16) + x, (tileZ * 64) + (chunkZ * 16) + z);
                         }
                     }
                 }
@@ -41,17 +41,16 @@ void Converter::RegionConverter::ColorConverter::setChunkVoid(Converter::RegionC
     }
 }
 
-void Converter::RegionConverter::ColorConverter::getPixelColor(const array<unsigned char *, 4> &pixel, int x, int z) {
+void Converter::RegionConverter::ColorConverter::setPixelColor(const array<unsigned char *, 4> &pixel, int x, int z) {
     RegionParser::Parameters* blockParameters = &parametersFromPixel(x, z);
     if (blockParameters->stateId != AIR_ID) {
-        
     }
 }
 
 Converter::RegionConverter::RegionParser::Parameters &
 Converter::RegionConverter::ColorConverter::parametersFromPixel(int x, int z) {
     return (*region[x % 64][z % 64]->chunks
-    [(x - (x % 64) * 64) % 16][(z - (z % 64) * 64) % 16].chunk)
+    [(x - (x % 64) * 64) % 16][(z - (z % 64) * 64) % 16].chunk) // error here
     [x - (x - (x % 64) * 64) % 16, z - (z - (z % 64) * 64) % 16]; // this is disgusting
 }
 

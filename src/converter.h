@@ -1,7 +1,7 @@
 #ifndef XAEROTOJOURNEYMAP_CONVERTER_H
 #define XAEROTOJOURNEYMAP_CONVERTER_H
 
-#define AIR_ID -16777216
+#define AIR_ID (-16777216)
 
 #define REGION_SIZE 512
 
@@ -126,8 +126,8 @@ private:
                 void incrementPosition(int bytes);
                 void skipBits(int bits);
 
-                bool getNextBool();
-                int getNextBits(int numberOfBits);
+                bool getNextBool() const;
+                int getNextBits(int numberOfBits) const;
                 bool getNextBool(bool advancePosition);
                 int getNextBits(int numberOfBits, bool advancePosition);
 
@@ -179,7 +179,7 @@ private:
 
             RegionParser::Parameters & parametersFromPixel(int x, int z);
             void setChunkVoid(Image & image, int chunkX, int chunkZ);
-            void getPixelColor(const std::array<unsigned char*, 4> & pixel, int x, int z);
+            void setPixelColor(const std::array<unsigned char*, 4> & pixel, int x, int z);
         };
 
     public:

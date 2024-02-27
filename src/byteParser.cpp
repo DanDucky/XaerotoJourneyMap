@@ -1,32 +1,29 @@
 #include "converter.h"
-#include <string>
 #include <cmath>
 
 using namespace std;
 
 void Converter::RegionConverter::RegionParser::ByteParser::loadNextByte() {
-    value = (unsigned char) (*file)[filePosition] & 255;
-//    value = (unsigned char) file->substr(filePosition, 1)[0] & 255;
+    value = (unsigned char) file->c_str()[filePosition];
     filePosition++;
     position = 0;
 }
 
 void Converter::RegionConverter::RegionParser::ByteParser::loadNextOfSize(int size) {
-    const string substring = file->substr(filePosition, size);
     int constructedInt = 0;
     for (int i = 0; i < size; i++) {
-        constructedInt = constructedInt << 8 | static_cast<unsigned char>(substring[i]);
+        constructedInt = constructedInt << 8 | static_cast<unsigned char>(file->c_str()[filePosition + i]);
     }
     value = constructedInt;
     filePosition += size;
     position = 0;
 }
 
-bool Converter::RegionConverter::RegionParser::ByteParser::getNextBool() {
+bool Converter::RegionConverter::RegionParser::ByteParser::getNextBool() const {
     return ((value >> position) & 1) == 1;
 }
 
-int Converter::RegionConverter::RegionParser::ByteParser::getNextBits(int numberOfBits) {
+int Converter::RegionConverter::RegionParser::ByteParser::getNextBits(int numberOfBits) const {
     return ((value >> position) & ((int) pow(2, numberOfBits) - 1));
 }
 
@@ -83,10 +80,9 @@ int Converter::RegionConverter::RegionParser::ByteParser::getFilePosition() cons
 }
 
 int Converter::RegionConverter::RegionParser::ByteParser::peekNextInt() {
-    const string substring = file->substr(filePosition, 4);
     int constructedInt = 0;
     for (int i = 0; i < 4; i++) {
-        constructedInt = constructedInt << 8 | static_cast<unsigned char>(substring[i]);
+        constructedInt = constructedInt << 8 | static_cast<unsigned char>(file->c_str()[filePosition + i]);
     }
     return constructedInt;
 }
