@@ -47,6 +47,7 @@ CPMAddPackage(
             "BUILD_SHARED_LIBS OFF"
             "LIBZIP_INCLUDE_DIR ${libzip_SOURCE_DIR}/lib"
             "LIBZIP_LIBRARY ${libzip_SOURCE_DIR}/../libzip-build/lib/libzip.a"
+            "_libzip_pkgcfg ${libzip_BUILD_DIR}/../libzip-build/libzip-config.cmake"
 )
 
 configure_file (
