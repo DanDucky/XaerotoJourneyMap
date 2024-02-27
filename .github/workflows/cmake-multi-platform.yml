@@ -19,7 +19,7 @@ jobs:
           - {
             name: "Windows Latest MinGW", artifact: "Windows-MinGW",
             os: windows-latest,
-            cc: "gcc", cxx: "g++"
+            cc: "D:/a/XaerotoJourneyMap/XaerotoJourneyMap/mingw/mingw64/bin/gcc.exe", cxx: "D:/a/XaerotoJourneyMap/XaerotoJourneyMap/mingw/mingw64/bin/g++.exe"
           }
           - {
             name: "Ubuntu Latest GCC", artifact: "Linux",
@@ -34,6 +34,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Download GCC-13 on Windows
+        if: matrix.config.name == 'Windows Latest MinGW'
+        run: |
+          curl -o mingw.zip https://github.com/brechtsanders/winlibs_mingw/releases/download/13.2.0posix-17.0.6-11.0.1-ucrt-r5/winlibs-x86_64-posix-seh-gcc-13.2.0-llvm-17.0.6-mingw-w64ucrt-11.0.1-r5.zip
+          Expand-Archive -Path mingw.zip -DestinationPath mingw
 
       - name: Download GCC-13
         if: matrix.config.name == 'Ubuntu Latest GCC'
