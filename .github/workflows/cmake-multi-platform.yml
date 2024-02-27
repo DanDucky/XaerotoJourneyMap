@@ -227,7 +227,11 @@ jobs:
       - name: Install Strip
         run: cmake --install build --prefix instdir --strip
 
-      - name: Upload
+      - name: Rename Exe
+        if: matrix.config.name == 'Windows Latest MinGW'
+        run: cp instdir/bin/XaerotoJourneyMap.exe instdir/bin/XaerotoJourneyMap
+
+      - name: Upload 
         uses: actions/upload-artifact@v3
         with:
           path: instdir/bin/XaerotoJourneyMap
