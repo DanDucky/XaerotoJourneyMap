@@ -93,7 +93,7 @@ void Converter::convertDimension(int dimension) {
 
 void Converter::RegionConverter::loadRegion(std::filesystem::path region) { // read from zippington
     using namespace libzippp;
-    ZipArchive zip(region);
+    ZipArchive zip(region.string());
     zip.open(ZipArchive::ReadOnly);
 
     ZipEntry entry = zip.getEntry("region.xaero");
