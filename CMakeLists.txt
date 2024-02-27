@@ -45,6 +45,8 @@ CPMAddPackage(
         OPTIONS
             "CMAKE_BUILD_TYPE Release"
             "BUILD_SHARED_LIBS OFF"
+            "LIBZIP_INCLUDE_DIR ${libzip_SOURCE_DIR}/lib"
+            "LIBZIP_LIBRARY ${libzip_SOURCE_DIR}/../libzip-build/lib/libzip.a"
 )
 
 configure_file (
