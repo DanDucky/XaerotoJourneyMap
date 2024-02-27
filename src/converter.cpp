@@ -20,6 +20,8 @@
 #include <bitset>
 #include <stack>
 
+#define timeSince(time) std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - time).count()
+
 using namespace std;
 //using namespace Poco::Zip;
 using namespace filesystem;
@@ -38,7 +40,7 @@ void Converter::runConversion() {
     cout << "converting overworld" << endl;
     auto startTime = chrono::high_resolution_clock::now();
     convertDimension(0);
-    cout << "finished in: " << chrono::duration<float, chrono::milliseconds::period>(chrono::high_resolution_clock::now() - startTime) << endl;
+    cout << "finished in: " << timeSince(startTime) << endl;
 
 //    convertDimension(1);
 //    convertDimension(-1);
