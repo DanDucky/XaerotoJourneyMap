@@ -19,7 +19,8 @@ jobs:
           - {
             name: "Windows Latest MinGW", artifact: "Windows-MinGW",
             os: windows-latest,
-            cc: "D:/a/XaerotoJourneyMap/XaerotoJourneyMap/mingw64/bin/gcc.exe", cxx: "D:/a/XaerotoJourneyMap/XaerotoJourneyMap/mingw64/bin/g++.exe"
+            cc: "D:/a/XaerotoJourneyMap/XaerotoJourneyMap/mingw64/bin/gcc.exe", cxx: "D:/a/XaerotoJourneyMap/XaerotoJourneyMap/mingw64/bin/g++.exe",
+#            cmake_flags: "-DCMAKE_LINKER=D:/a/XaerotoJourneyMap/XaerotoJourneyMap/mingw64/bin/ld.exe"
           }
           - {
             name: "Ubuntu Latest GCC", artifact: "Linux",
@@ -174,6 +175,7 @@ jobs:
               -D CMAKE_C_COMPILER_LAUNCHER=ccache
               -D CMAKE_CXX_COMPILER_LAUNCHER=ccache
               -D CMAKE_CXX_FLAGS=${{matrix.config.cpp_flags}}
+              ${{matrix.config.cmake_flags}}
             RESULT_VARIABLE result
           )
           if (NOT result EQUAL 0)

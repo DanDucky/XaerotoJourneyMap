@@ -3,10 +3,25 @@ project(XaerotoJourneyMap)
 set(CMAKE_CXX_STANDARD 23)
 add_executable(XaerotoJourneyMap src/main.cpp src/converter.cpp src/converter.h src/byteParser.cpp src/colorConverter.cpp src/lookup/stateToColor.h)
 
+get_cmake_property(CACHE_VARS CACHE_VARIABLES)
+foreach(CACHE_VAR ${CACHE_VARS})
+    get_property(CACHE_VAR_HELPSTRING CACHE ${CACHE_VAR} PROPERTY HELPSTRING)
+    if(CACHE_VAR_HELPSTRING STREQUAL "No help, variable specified on the command line.")
+        get_property(CACHE_VAR_TYPE CACHE ${CACHE_VAR} PROPERTY TYPE)
+        if(CACHE_VAR_TYPE STREQUAL "UNINITIALIZED")
+            set(CACHE_VAR_TYPE)
+        else()
+            set(CACHE_VAR_TYPE :${CACHE_VAR_TYPE})
+        endif()
+        set(CMAKE_ARGS "${CMAKE_ARGS} -D${CACHE_VAR}${CACHE_VAR_TYPE}=\"${${CACHE_VAR}}\"")
+    endif()
+endforeach()
+message("CMAKE_ARGS: ${CMAKE_ARGS}")
+
 add_custom_command(
         OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/lookup/stateToColor.h
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/resources
-        COMMAND cmake . && cmake --build . && ./Bundler blockstateidtocolor.txt ../src/lookup/stateToColor.h
+        COMMAND cmake ${CMAKE_ARGS} . && cmake --build . && ./Bundler blockstateidtocolor.txt ../src/lookup/stateToColor.h
 )
 
 file(DOWNLOAD
